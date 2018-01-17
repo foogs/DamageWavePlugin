@@ -1,0 +1,39 @@
+﻿<UserControl x:Class="DamageWave.DamageWaveControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:local="clr-namespace:DamageWave"
+             mc:Ignorable="d"
+             d:DesignHeight="455.127" d:DesignWidth="300">
+    <DockPanel>
+        <StackPanel DockPanel.Dock="Top">
+            <StackPanel DataContext="{Binding Settings.Data}">
+                <CheckBox Content="Enable DamageWave" Margin="3" IsChecked="{Binding Enabled}" Checked="CheckBox_Checked" />
+                <StackPanel Orientation="Horizontal">
+                    <TextBox Margin="3" Width="150" Text="{Binding TypeID}" />
+                    <Label Content="TypeID" Margin="3" />
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <TextBox Margin="3" Width="150" Text="{Binding SubTypeID}" />
+                    <Label Content="SubtypeID" Margin="3" />
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <TextBox Margin="3" Width="150" Text="{Binding DamageAmount}" />
+                    <Label Content="Damage amout(percent, 1%)" Margin="3" />
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <TextBox Margin="3" Width="150" Text="{Binding CommandTime}" />
+                    <Label Content="Check time hh:mm" Margin="3" />
+                </StackPanel>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <Button Content="Check now" Margin="3" Click="Reveal_OnClick" Width="72" />
+                <Button Content="Save settings" Margin="3" Click="Conceal_OnClick" Width="72" />
+            </StackPanel>
+            <Label Content="Thanks to:&#xD;&#xA;Jimmacle for making Torch.&#xD;&#xA;Rexxar for Degradate Mod."/>
+            <Image Stretch="None" Source="519.png" Height="225"/>
+        </StackPanel>
+    </DockPanel>
+
+</UserControl>
