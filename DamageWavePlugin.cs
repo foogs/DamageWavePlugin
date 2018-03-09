@@ -76,7 +76,7 @@ namespace DamageWave
         public override void Init(ITorchBase torch)
         {
             base.Init(torch);
-
+           
             try
             {
                 Settings = Persistent<Settings>.Load(Path.Combine(StoragePath, "DamageWave.cfg"));
@@ -88,9 +88,9 @@ namespace DamageWave
 
             if (Settings?.Data == null)
                 Settings = new Persistent<Settings>(Path.Combine(StoragePath, "DamageWave.cfg"), new Settings());
-            //Settings.Data.PropertyChanged += Data_PropertyChanged;
+         
 
-            foreach (var plugin in torch.Plugins)
+            foreach (var plugin in torch.Managers.GetManager<PluginManager>())
             {
                 if (plugin.Id == Guid.Parse("17f44521-b77a-4e85-810f-ee73311cf75d"))
                 {
@@ -98,8 +98,7 @@ namespace DamageWave
                     ReflectMethodRevealAll = plugin.GetType().GetMethod("RevealAll", BindingFlags.Public | BindingFlags.Instance);
                 }
             }
-            Log.Info("Init block degra");
-            //_concealedAabbTree = new MyDynamicAABBTreeD(MyConstants.GAME_PRUNING_STRUCTURE_AABB_EXTENSION);
+            LogTo("Init block degra");       
         }
      
         public override void Update()
@@ -111,13 +110,13 @@ namespace DamageWave
             {
                 
                 if (_mycounter2>0) _mycounter2 = _mycounter2 -1;
-              //  Log.Info("_counter2 = " + _mycounter2);
+          
                 if (((DateTime.Now.Hour == Settings.Data.CommandRunTime.Hour) && (DateTime.Now.Minute == Settings.Data.CommandRunTime.Minute) && _mycounter2 == 0 )|| isSkippedDoubleTimeCheck())
                 {
                     _mycounter2 = 60;
-                    Log.Info("ReflectRevealAll>>>>>>>>_counter2 =2 ");
-                    ReflectRevealAll();
-                    Log.Info("before ProcessDegradate " + _mycounter2);
+                     
+                    
+                    LogTo("before ProcessDegradate " + _mycounter2);
                     ProcessDegradate();
                 }
             }
@@ -140,27 +139,37 @@ namespace DamageWave
             Settings.Save(Path.Combine(StoragePath, "DamageWave.cfg"));
         }
 
+        public void LogTo(string text)
+        {
+            if(Settings.Data.Enabled_Debug)
+            Log.Info(text);
+        }  
+        
         public void ProcessDegradate()
         {
+
             Settings.Data.LastExecCommandTime = DateTime.Now;
-            Log.Info("DEGRADATE STARTED - start");
-           // Log.Info("DEGRADATE    Torch.Invoke(() => ");
-        //    Torch.Invoke(() =>
+            LogTo("DEGRADATE STARTED - start");
+            ReflectRevealAll();
+            // LogTo("DEGRADATE    Torch.Invoke(() => ");
+            //    Torch.Invoke(() =>
             MyAPIGateway.Entities.GetEntities(entities);
-            Log.Info("DEGRADATE2:" + entities.Count().ToString());
+            LogTo("DEGRADATE2:" + entities.Count().ToString());
+            
             foreach (IMyEntity entity in entities)  //cycles through all entities
                 {
+                //add parallel task
                     var grid = entity as IMyCubeGrid;   //assumes entity is a grid
                     if (grid?.Physics == null || grid.Closed)   //if it is not a grid, or no longer exists, skip to next entity
                         continue;
-                Log.Info("DEGRADATE   in foreach");
+                LogTo("DEGRADATE   in foreach");
                 long owner = grid.BigOwners.FirstOrDefault();
                     var blocks = new List<IMySlimBlock>();
                     grid.GetBlocks(blocks);
                     var toRemove = new HashSet<IMySlimBlock>();
                     if (blocks.Count != 0)
                     {
-                    Log.Info("DEGRADATE   blocks Count " + blocks.Count);
+                    LogTo("DEGRADATE   blocks Count " + blocks.Count);
                         if (Settings.Data.TypeID != null && Settings.Data.TypeID.Length >4)
                     blocks = blocks.FindAll(block => block.BlockDefinition.Id.TypeId.ToString() == "MyObjectBuilder_" + Settings.Data.TypeID);
 
@@ -169,15 +178,16 @@ namespace DamageWave
                   
                     foreach (IMySlimBlock target in blocks)  //cycles through list of targeted blocks
                         {
-                        Log.Info("found block " + target.BlockDefinition.DisplayNameText + "Integrity " + target.Integrity +"/"+ target.MaxIntegrity + " "+target.CurrentDamage+ " BuildPercent: " + target.BuildPercent());
+                        LogTo("found block " + target.BlockDefinition.DisplayNameText + "Integrity " + target.Integrity +"/"+ target.MaxIntegrity + " "+target.CurrentDamage+ " BuildPercent: " + target.BuildPercent());
                         if (target?.CubeGrid == null || target.BuildPercent() <= (float)0.05 || target.Closed())  //if the block doesnt exist or is below min build percentage
                             {
-                            Log.Info("add block for delete: " + target.FatBlock.DisplayName);
+                            LogTo("add block for delete: " + target.FatBlock.DisplayName);
                            toRemove.Add(target);  //slates block for removal, skips damage step
                                 continue;
                             }
                         //MyAPIGateway.Utilities.InvokeOnGameThread(() => 
-                        Log.Info("block DoDamage: " + target.BlockDefinition.DisplayNameText);
+                        LogTo("block DoDamage: " + target.BlockDefinition.DisplayNameText);
+                        //add list for parralel dmg after
                         target.DoDamage((target.MaxIntegrity / 100) * Settings.Data.DamageAmount, MyStringHash.GetOrCompute("Degradation"), true);  //applies damage
                         }
 

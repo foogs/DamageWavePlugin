@@ -8,8 +8,9 @@ namespace DamageWave
     public class Settings : ViewModel
     {
         private bool _enabled = true;
-        private string _typeid = "Battary";
-        private string _subtypeid = "na";
+        private bool _debug_enabled = false;
+        private string _typeid = "Reactor";
+        private string _subtypeid = "LargeBlockLargeGenerator";
 
         [System.Xml.Serialization.XmlIgnoreAttribute]
         private ulong _checkInterval = 1739;
@@ -34,6 +35,12 @@ namespace DamageWave
         {
             get => _enabled;
             set { _enabled = value; OnPropertyChanged(); }
+        }
+
+        public bool Enabled_Debug
+        {
+            get => _debug_enabled;
+            set { _debug_enabled = value; OnPropertyChanged(); }
         }
 
         public ulong DamageAmount
