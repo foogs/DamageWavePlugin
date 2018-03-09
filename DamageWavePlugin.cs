@@ -76,7 +76,7 @@ namespace DamageWave
         public override void Init(ITorchBase torch)
         {
             base.Init(torch);
-
+           
             try
             {
                 Settings = Persistent<Settings>.Load(Path.Combine(StoragePath, "DamageWave.cfg"));
@@ -88,9 +88,9 @@ namespace DamageWave
 
             if (Settings?.Data == null)
                 Settings = new Persistent<Settings>(Path.Combine(StoragePath, "DamageWave.cfg"), new Settings());
-            //Settings.Data.PropertyChanged += Data_PropertyChanged;
+         
 
-            foreach (var plugin in torch.Plugins)
+            foreach (var plugin in torch.Managers.GetManager<PluginManager>())
             {
                 if (plugin.Id == Guid.Parse("17f44521-b77a-4e85-810f-ee73311cf75d"))
                 {
@@ -98,8 +98,7 @@ namespace DamageWave
                     ReflectMethodRevealAll = plugin.GetType().GetMethod("RevealAll", BindingFlags.Public | BindingFlags.Instance);
                 }
             }
-            Log.Info("Init block degra");
-            //_concealedAabbTree = new MyDynamicAABBTreeD(MyConstants.GAME_PRUNING_STRUCTURE_AABB_EXTENSION);
+            Log.Info("Init block degra");       
         }
      
         public override void Update()
@@ -111,12 +110,12 @@ namespace DamageWave
             {
                 
                 if (_mycounter2>0) _mycounter2 = _mycounter2 -1;
-              //  Log.Info("_counter2 = " + _mycounter2);
+          
                 if (((DateTime.Now.Hour == Settings.Data.CommandRunTime.Hour) && (DateTime.Now.Minute == Settings.Data.CommandRunTime.Minute) && _mycounter2 == 0 )|| isSkippedDoubleTimeCheck())
                 {
                     _mycounter2 = 60;
-                    Log.Info("ReflectRevealAll>>>>>>>>_counter2 =2 ");
-                    ReflectRevealAll();
+                     
+                    
                     Log.Info("before ProcessDegradate " + _mycounter2);
                     ProcessDegradate();
                 }
@@ -142,14 +141,18 @@ namespace DamageWave
 
         public void ProcessDegradate()
         {
+
             Settings.Data.LastExecCommandTime = DateTime.Now;
             Log.Info("DEGRADATE STARTED - start");
-           // Log.Info("DEGRADATE    Torch.Invoke(() => ");
-        //    Torch.Invoke(() =>
+            ReflectRevealAll();
+            // Log.Info("DEGRADATE    Torch.Invoke(() => ");
+            //    Torch.Invoke(() =>
             MyAPIGateway.Entities.GetEntities(entities);
             Log.Info("DEGRADATE2:" + entities.Count().ToString());
+            
             foreach (IMyEntity entity in entities)  //cycles through all entities
                 {
+                //add parallel task
                     var grid = entity as IMyCubeGrid;   //assumes entity is a grid
                     if (grid?.Physics == null || grid.Closed)   //if it is not a grid, or no longer exists, skip to next entity
                         continue;
@@ -178,6 +181,7 @@ namespace DamageWave
                             }
                         //MyAPIGateway.Utilities.InvokeOnGameThread(() => 
                         Log.Info("block DoDamage: " + target.BlockDefinition.DisplayNameText);
+                        //add list for parralel dmg after
                         target.DoDamage((target.MaxIntegrity / 100) * Settings.Data.DamageAmount, MyStringHash.GetOrCompute("Degradation"), true);  //applies damage
                         }
 

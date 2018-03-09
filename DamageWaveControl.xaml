@@ -7,15 +7,16 @@
              mc:Ignorable="d"
              d:DesignHeight="455.127" d:DesignWidth="300">
     <DockPanel>
-        <StackPanel DockPanel.Dock="Top">
+        <StackPanel DockPanel.Dock="Top" Height="545">
             <StackPanel DataContext="{Binding Settings.Data}">
-                <CheckBox Content="Enable DamageWave" Margin="3" IsChecked="{Binding Enabled}" Checked="CheckBox_Checked" />
+                <CheckBox Content="Enable DamageWave" Margin="3" IsChecked="{Binding Enabled}" Checked="CheckBox_Checked" ToolTip="Enable plugin (or not) ;D" />
+                <CheckBox x:Name="Checkbox_debug" Content="Enable Debug" Margin="3" IsChecked="{Binding Debug}" Checked="CheckBox_Checked" ToolTip="Enable debug spam to log" />
                 <StackPanel Orientation="Horizontal">
-                    <TextBox Margin="3" Width="150" Text="{Binding TypeID}" />
+                    <TextBox Margin="3" Width="150" Text="{Binding TypeID}" ToolTip="Block TypeID" />
                     <Label Content="TypeID" Margin="3" />
                 </StackPanel>
                 <StackPanel Orientation="Horizontal">
-                    <TextBox Margin="3" Width="150" Text="{Binding SubTypeID}" />
+                    <TextBox Margin="3" Width="150" Text="{Binding SubTypeID}" ToolTip="Block SubtypeID" />
                     <Label Content="SubtypeID" Margin="3" />
                 </StackPanel>
                 <StackPanel Orientation="Horizontal">
@@ -23,16 +24,16 @@
                     <Label Content="Damage amout(percent, 1%)" Margin="3" />
                 </StackPanel>
                 <StackPanel Orientation="Horizontal">
-                    <TextBox Margin="3" Width="150" Text="{Binding CommandTime}" />
+                    <TextBox Margin="3" Width="150" Text="{Binding CommandTime}" ToolTip="Time" />
                     <Label Content="Check time hh:mm" Margin="3" />
                 </StackPanel>
             </StackPanel>
             <StackPanel Orientation="Horizontal">
-                <Button Content="Check now" Margin="3" Click="Reveal_OnClick" Width="72" />
-                <Button Content="Save settings" Margin="3" Click="Conceal_OnClick" Width="72" />
+                <Button Content="Check now" Margin="3" Click="Reveal_OnClick" Width="72" ToolTip="Use only while server started!" />
+                <Button Content="Save settings" Margin="3" Click="Conceal_OnClick" Width="72" IsEnabled="False" ToolTip="Disabled for safe." />
             </StackPanel>
-            <Label Content="Thanks to:&#xD;&#xA;Jimmacle for making Torch.&#xD;&#xA;Rexxar for Degradate Mod."/>
-            <Image Stretch="None" Source="519.png" Height="225"/>
+            <Label Content="Thanks to:&#xA;Jimmacle for making Torch.&#xA;Rexxar for Degradate Mod." ToolTip="(no)"/>
+            <Image Source="512.png" Height="200" ToolTip="kek" HorizontalAlignment="Left" Width="300"/>
         </StackPanel>
     </DockPanel>
 
