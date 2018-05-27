@@ -145,6 +145,9 @@
       <DependentUpon>DamageWaveControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="DamageWavePlugin.cs" />
+    <Compile Include="EditRulesForm.xaml.cs">
+      <DependentUpon>EditRulesForm.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Settings.cs" />
   </ItemGroup>
@@ -155,6 +158,10 @@
     <Page Include="DamageWaveControl.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="EditRulesForm.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>
   <ItemGroup>

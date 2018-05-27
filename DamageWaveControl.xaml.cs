@@ -83,7 +83,7 @@ namespace DamageWave
         private void Reveal_OnClick(object sender, RoutedEventArgs e)
         {
            var p = Plugin;
-            Plugin.Torch.Invoke(delegate { p.ProcessDegradate(); });
+            Plugin.Torch.Invoke(delegate { p.DamageProcess(); });
         }
 
         private void Conceal_OnClick(object sender, RoutedEventArgs e)
@@ -99,6 +99,17 @@ namespace DamageWave
         private void TextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
 
+        }
+
+        private void EditRules_Click(object sender, RoutedEventArgs e)
+        {
+            var editor = new EditRulesForm
+            {
+                Owner = Window.GetWindow(this),
+                DataContext = DataContext,
+                WindowStartupLocation = WindowStartupLocation.CenterOwner
+            };
+            editor.ShowDialog();
         }
     }
 }

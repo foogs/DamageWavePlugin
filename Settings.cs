@@ -1,7 +1,20 @@
 ﻿using System.IO;
 using System.Xml.Serialization;
 using Torch;
+using Torch.Collections;
 using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.IO;
+using System.Linq;
+using System.Runtime.CompilerServices;
+using System.Xml.Serialization;
+using NLog.Targets;
+using Sandbox.Definitions;
+using Torch;
+using Torch.Collections;
+using VRage.Game;
+using VRage.ObjectBuilders;
 
 namespace DamageWave
 {
@@ -15,12 +28,29 @@ namespace DamageWave
         [System.Xml.Serialization.XmlIgnoreAttribute]
         private ulong _checkInterval = 1739;
 
-       
+        [XmlIgnore]
+        public MtObservableList<BlocksToDamageSettings> DynamicConcealment { get; } =
+            new MtObservableList<BlocksToDamageSettings>();
+
         public DateTime CommandRunTime;
 
         public DateTime LastExecCommandTime;
         private string _commandTime = "23:45";
         private ulong _damageamount = 1;
+
+        [XmlElement(nameof(DynamicConcealment))]
+        public BlocksToDamageSettings[] DynamicConcealmentSerial
+        {
+            get => DynamicConcealment.ToArray();
+            set
+            {
+                DynamicConcealment.Clear();
+                if (value != null)
+                    foreach (var k in value)
+                        DynamicConcealment.Add(k);
+            }
+        }
+
 
         public string CommandTime
         {
@@ -89,5 +119,87 @@ namespace DamageWave
             }
             return result;
         }
+
+
+        public class BlocksToDamageSettings : ViewModel
+        {
+            private string _typeId;
+            private string _subtypeId;
+            private double _distance;
+
+            /// <summary>
+            /// Target type ID
+            /// </summary>
+            [XmlIgnore]
+            public MyObjectBuilderType? TargetTypeId
+            {
+                get
+                {
+                    if (MyObjectBuilderType.TryParse(_typeId, out var type))
+                        return type;
+                    if (MyObjectBuilderType.TryParse("MyObjectBuilder_" + _typeId, out type))
+                        return type;
+                    return null;
+                }
+            }
+
+            /// <summary>
+            /// Subtype ID to target, or null to target all subtypes
+            /// </summary>
+            [XmlAttribute("TargetSubtype")]
+            [DefaultValue(null)]
+            public string TargetSubtypeId
+            {
+                get => _subtypeId;
+                set
+                {
+                    _subtypeId = value;
+                    OnPropertyChanged();
+                }
+            }
+
+            /// <summary>
+            /// The assembly qualified name of the <see cref="Target"/>
+            /// </summary>
+            [XmlAttribute("TargetType")]
+            public string TargetTypeIdString
+            {
+                get => _typeId?.Replace("MyObjectBuilder_", "") ?? "null";
+                set
+                {
+                    _typeId = value.Trim();
+                    OnPropertyChanged();
+                    // ReSharper disable once ExplicitCallerInfoArgument
+                    OnPropertyChanged(nameof(TargetSubtypeIdOptions));
+                }
+            }
+            
+            /// <summary>
+            /// Distance to conceal at
+            /// </summary>
+            [XmlAttribute("Distance")]
+            public double Distance
+            {
+                get => _distance;
+                set => SetValue(ref _distance, value);
+            }
+
+            [XmlIgnore]
+            public ICollection<string> TargetTypeIdOptions =>
+                MyDefinitionManager.Static?.GetAllDefinitions()
+                    .OfType<MyCubeBlockDefinition>()
+                    .Select(x => x.Id.TypeId).Distinct()
+                    .Select(x => x.ToString().Replace("MyObjectBuilder_", "")).ToList() ??
+                new List<string>();
+
+            [XmlIgnore]
+            public ICollection<string> TargetSubtypeIdOptions =>
+                MyDefinitionManager.Static?.GetAllDefinitions()
+                    .OfType<MyCubeBlockDefinition>()
+                    .Where(x => TargetTypeId.HasValue && x.Id.TypeId == TargetTypeId.Value)
+                    .Select(x => x.Id.SubtypeName ?? "")
+                    .ToList() ?? new List<string>();
+        }
+
     }
 }
