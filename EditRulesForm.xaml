@@ -17,7 +17,7 @@
             <StackPanel Orientation="Horizontal"/>
         </StackPanel>
         <ScrollViewer Grid.Row="1" Margin="3">
-            <ListView Name="List" ItemsSource="{Binding Path=DynamicConcealment}" SelectionChanged="List_SelectionChanged">
+            <ListView Name="List" ItemsSource="{Binding Path=BigRuleList}" SelectionChanged="List_SelectionChanged">
                 <ListView.View>
                     <GridView>
                         <GridViewColumn Header="Type ID" Width="150">
@@ -41,7 +41,7 @@
                         <GridViewColumn Header="Damage%" Width="150">
                             <GridViewColumn.CellTemplate>
                                 <DataTemplate>
-                                    <TextBox ToolTip="Conceal Distance" Text="{Binding Distance, Mode=TwoWay}" />
+                                    <TextBox ToolTip="Conceal Distance" Text="{Binding Damage, Mode=TwoWay}" />
                                 </DataTemplate>
                             </GridViewColumn.CellTemplate>
                         </GridViewColumn>

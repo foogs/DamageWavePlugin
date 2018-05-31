@@ -41,13 +41,13 @@ namespace DamageWave
             }
             else if (sender == AddButton)
             {
-                plugin.Settings.Data.DynamicConcealment.Add(new Settings.BlocksToDamageSettings());
+                plugin.Settings.Data.BigRuleList.Add(new Settings.BlocksToDamageSettings());
             }
             else if (sender == RemoveButton)
             {
                 var entry = List.SelectedItem as Settings.BlocksToDamageSettings;
                 if (entry != null)
-                    plugin.Settings.Data.DynamicConcealment.Remove(entry);
+                    plugin.Settings.Data.BigRuleList.Remove(entry);
             }
             // ReSharper restore PossibleUnintendedReferenceComparison
         }

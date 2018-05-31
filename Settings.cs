@@ -29,7 +29,7 @@ namespace DamageWave
         private ulong _checkInterval = 1739;
 
         [XmlIgnore]
-        public MtObservableList<BlocksToDamageSettings> DynamicConcealment { get; } =
+        public MtObservableList<BlocksToDamageSettings> BigRuleList { get; } =
             new MtObservableList<BlocksToDamageSettings>();
 
         public DateTime CommandRunTime;
@@ -38,16 +38,16 @@ namespace DamageWave
         private string _commandTime = "23:45";
         private ulong _damageamount = 1;
 
-        [XmlElement(nameof(DynamicConcealment))]
+        [XmlElement(nameof(BigRuleList))]
         public BlocksToDamageSettings[] DynamicConcealmentSerial
         {
-            get => DynamicConcealment.ToArray();
+            get => BigRuleList.ToArray();
             set
             {
-                DynamicConcealment.Clear();
+                BigRuleList.Clear();
                 if (value != null)
                     foreach (var k in value)
-                        DynamicConcealment.Add(k);
+                        BigRuleList.Add(k);
             }
         }
 
@@ -164,7 +164,7 @@ namespace DamageWave
             [XmlAttribute("TargetType")]
             public string TargetTypeIdString
             {
-                get => _typeId?.Replace("MyObjectBuilder_", "") ?? "null";
+                get => _typeId;
                 set
                 {
                     _typeId = value.Trim();
@@ -177,8 +177,8 @@ namespace DamageWave
             /// <summary>
             /// Distance to conceal at
             /// </summary>
-            [XmlAttribute("Distance")]
-            public double Distance
+            [XmlAttribute("Damage")]
+            public double Damage
             {
                 get => _distance;
                 set => SetValue(ref _distance, value);

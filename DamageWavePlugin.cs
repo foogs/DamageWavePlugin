@@ -165,38 +165,50 @@ namespace DamageWave
                 LogTo("DEGRADATE   in foreach");
                 long owner = grid.BigOwners.FirstOrDefault();
                 var blocks = new List<IMySlimBlock>();
+                var tblocks = new List<IMySlimBlock>();
                 grid.GetBlocks(blocks);
+                LogTo("DEGRADATE   GetBlocks  bloks : " + blocks.Count());
                 var toRemove = new HashSet<IMySlimBlock>();
                 if (blocks.Count != 0)
                 {
-                    LogTo("DEGRADATE   blocks Count " + blocks.Count);
-                    if (Settings.Data.TypeID != null && Settings.Data.TypeID.Length > 4)
-                        blocks = blocks.FindAll(block => block.BlockDefinition.Id.TypeId.ToString() == "MyObjectBuilder_" + Settings.Data.TypeID);
+                    foreach (var rule in Settings.Data.BigRuleList)
+                    {
 
-                    if (Settings.Data.SubTypeID != null && Settings.Data.SubTypeID.Length > 4)
-                        blocks = blocks.FindAll(block => block.BlockDefinition.Id.SubtypeId.ToString() == Settings.Data.SubTypeID);
-
-                        foreach (IMySlimBlock target in blocks)  //cycles through list of targeted blocks
+                        if (rule.TargetTypeIdString != null)
                         {
-                        LogTo("found block " + target.BlockDefinition.DisplayNameText + "Integrity " + target.Integrity + "/" + target.MaxIntegrity + " " + target.CurrentDamage + " BuildPercent: " + target.BuildPercent());
-                        if (target?.CubeGrid == null || target.BuildPercent() <= (float)0.05 || target.Closed())  //if the block doesnt exist or is below min build percentage
+                            tblocks = blocks.FindAll(block => block.BlockDefinition.Id.TypeId.ToString().Equals(rule.TargetTypeId));
+                            LogTo("DEGRADATE   FindAll TargetTypeIdStringnot null blocks: " + blocks.Count());
+                        }
+                        if (rule.TargetSubtypeId != null)
+                            tblocks = tblocks.FindAll(block => block.BlockDefinition.Id.SubtypeId.ToString().Equals(rule.TargetSubtypeId));
+
+
+
+
+
+                        foreach (IMySlimBlock target in tblocks)  //cycles through list of targeted blocks
                         {
-                            LogTo("add block for delete: " + target.FatBlock.DisplayName);
-                            toRemove.Add(target);  //slates block for removal, skips damage step
-                            continue;
-                        }
-                        //MyAPIGateway.Utilities.InvokeOnGameThread(() => 
-                        LogTo("block DoDamage: " + target.BlockDefinition.DisplayNameText);
-                        //add list for parralel dmg after
+                            LogTo("found block " + target.BlockDefinition.DisplayNameText + "Integrity " + target.Integrity + "/" + target.MaxIntegrity + " " + target.CurrentDamage + " BuildPercent: " + target.BuildPercent());
+                            if (target?.CubeGrid == null || target.BuildPercent() <= (float)0.05 || target.Closed())  //if the block doesnt exist or is below min build percentage
+                            {
+                                LogTo("add block for delete: " + target.FatBlock.DisplayName);
+                                toRemove.Add(target);  //slates block for removal, skips damage step
+                                continue;
+                            }
+                            //MyAPIGateway.Utilities.InvokeOnGameThread(() => 
+                            LogTo("block DoDamage: " + target.BlockDefinition.DisplayNameText);
+                            //add list for parralel dmg after
 
-                        target.DoDamage((target.MaxIntegrity / 100) * Settings.Data.DamageAmount, MyStringHash.GetOrCompute("Degradation"), true);  //applies damage
+                            target.DoDamage((target.MaxIntegrity / 100) * Settings.Data.DamageAmount, MyStringHash.GetOrCompute("Degradation"), true);  //applies damage
                         }
-
+                        tblocks.Clear();
+                    }
                     foreach (IMySlimBlock block in toRemove)  //removes blocks slated for removal
                         block.CubeGrid.RemoveBlock(block);
                 }
+                toRemove.Clear();
                 blocks.Clear();  //clears block list
-                                 //only process fatblocks here
+                                 
             }
             Settings.Save(Path.Combine(StoragePath, "DamageWave.cfg"));
         }
