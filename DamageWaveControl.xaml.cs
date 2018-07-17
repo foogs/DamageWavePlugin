@@ -1,54 +1,8 @@
 ﻿#region
 
-using System.Linq;
+using System.IO;
 using System.Windows;
 using System.Windows.Controls;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Windows.Controls;
-using NLog;
-using Sandbox.ModAPI;
-using Torch;
-using Torch.API;
-using Torch.API.Plugins;
-using VRage.Game.ModAPI;
-using VRage.ModAPI;
-using System.Reflection;
-using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Windows.Controls;
-using NLog;
-using Sandbox.Definitions;
-using Sandbox.Engine.Multiplayer;
-using Sandbox.Game.Entities;
-using Sandbox.Game.EntityComponents;
-using Sandbox.Game.Multiplayer;
-using Sandbox.Game.World;
-using Sandbox.ModAPI;
-using Torch;
-using Torch.API;
-using Torch.API.Managers;
-using Torch.API.Plugins;
-using Torch.API.Session;
-using Torch.Collections;
-using Torch.Managers;
-using Torch.Session;
-using VRage.Game;
-using VRage.Game.Components;
-using VRage.Game.Definitions;
-using VRage.Game.ModAPI;
-using VRage.Game.ObjectBuilders.ComponentSystem;
-using VRage.ModAPI;
-using VRageMath;
-using VRage.Utils;
 #endregion
 
 namespace DamageWave
@@ -80,7 +34,7 @@ namespace DamageWave
             });*/
         }
 
-        private void Reveal_OnClick(object sender, RoutedEventArgs e)
+        private void CheckNow_OnClick(object sender, RoutedEventArgs e)
         {
            var p = Plugin;
             Plugin.Torch.Invoke(delegate { p.DamageProcess(); });

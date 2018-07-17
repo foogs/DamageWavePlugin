@@ -1,53 +1,24 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Windows.Controls;
-using NLog;
+﻿using NLog;
+using Sandbox.Game.Entities;
 using Sandbox.ModAPI;
-using Torch;
-using Torch.API;
-using Torch.API.Plugins;
-using VRage.Game.ModAPI;
-using VRage.ModAPI;
-using System.Reflection;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Threading;
+using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows.Controls;
-using NLog;
-using Sandbox.Definitions;
-using Sandbox.Engine.Multiplayer;
-using Sandbox.Game.Entities;
-using Sandbox.Game.EntityComponents;
-using Sandbox.Game.Multiplayer;
-using Sandbox.Game.World;
-using Sandbox.ModAPI;
 using Torch;
 using Torch.API;
 using Torch.API.Managers;
 using Torch.API.Plugins;
-using Torch.API.Session;
-using Torch.Collections;
 using Torch.Managers;
-using Torch.Session;
-using VRage.Game;
-using VRage.Game.Components;
-using VRage.Game.Definitions;
 using VRage.Game.ModAPI;
-using VRage.Game.ObjectBuilders.ComponentSystem;
-using VRage.ModAPI;
-using VRageMath;
 using VRage.Utils;
 
 namespace DamageWave
-{
-    //[Plugin("BlockDegradation", "1.0", "5658de3e-60c0-438b-a0a0-b235bc16a4ca")]
+{    
     public class DamageWavePlugin : TorchPluginBase, IWpfPlugin
     {
         public Persistent<Settings> Settings { get; private set; }
@@ -60,8 +31,7 @@ namespace DamageWave
 
         public ulong _mycounter;
         public ulong _mycounter2;
-        private bool _init;
-        public HashSet<IMyEntity> entities = new HashSet<IMyEntity>();  //create and get list of entities
+        private bool _init; 
 
         public DamageWavePlugin()
         {
@@ -76,15 +46,8 @@ namespace DamageWave
         public override void Init(ITorchBase torch)
         {
             base.Init(torch);
-
-            try
-            {
-                Settings = Persistent<Settings>.Load(Path.Combine(StoragePath, "DamageWave.cfg"));
-            }
-            catch (Exception e)
-            {
-                Log.Warn(e);
-            }
+            Settings = Persistent<Settings>.Load(Path.Combine(StoragePath, "DamageWave.cfg"));          
+            Log.Info("Init DamageWavePlugin");          
 
             if (Settings?.Data == null)
                 Settings = new Persistent<Settings>(Path.Combine(StoragePath, "DamageWave.cfg"), new Settings());
@@ -97,8 +60,7 @@ namespace DamageWave
                     concealment = plugin;
                     ReflectMethodRevealAll = plugin.GetType().GetMethod("RevealAll", BindingFlags.Public | BindingFlags.Instance);
                 }
-            }
-            LogTo("Init block degra");
+            } 
         }
 
         public override void Update()
@@ -115,8 +77,7 @@ namespace DamageWave
                 {
                     _mycounter2 = 60;
 
-
-                    LogTo("before ProcessDegradate " + _mycounter2);
+                    LogTo("before start DamageWave " + _mycounter2);
                     DamageProcess();
                 }
             }
@@ -141,7 +102,7 @@ namespace DamageWave
 
         public void LogTo(string text)
         {
-            if (Settings.Data.Enabled_Debug)
+            if (Settings.Data.Debug)
                 Log.Info(text);
         }
 
@@ -149,78 +110,72 @@ namespace DamageWave
         {
 
             Settings.Data.LastExecCommandTime = DateTime.Now;
-            LogTo("DEGRADATE STARTED - start");
-            ReflectRevealAll();
-            // LogTo("DEGRADATE    Torch.Invoke(() => ");
-            //    Torch.Invoke(() =>
-            MyAPIGateway.Entities.GetEntities(entities);
-            LogTo("DEGRADATE2:" + entities.Count().ToString());
+            LogTo("Damage wave incoming");
+            ReflectRevealAll();           
 
-            foreach (IMyEntity entity in entities)  //cycles through all entities
+            var AllGrids = MyEntities.GetEntities().OfType<MyCubeGrid>();
+
+            LogTo("All grids count:" + AllGrids.Count());
+
+            var tblocks = new ConcurrentDictionary<Sandbox.Game.Entities.Cube.MySlimBlock, float>();
+             
+        Parallel.ForEach(AllGrids, (cubegrid) =>  //cycles through all entities
             {
-                //add parallel task
-                var grid = entity as IMyCubeGrid;   //assumes entity is a grid
-                if (grid?.Physics == null || grid.Closed)   //if it is not a grid, or no longer exists, skip to next entity
-                    continue;
-                LogTo("DEGRADATE   in foreach");
-                long owner = grid.BigOwners.FirstOrDefault();
-                var blocks = new List<IMySlimBlock>();
-                var tblocks = new List<IMySlimBlock>();
-                grid.GetBlocks(blocks);
-                LogTo("DEGRADATE   GetBlocks  bloks : " + blocks.Count());
-                var toRemove = new HashSet<IMySlimBlock>();
-                if (blocks.Count != 0)
+                if (cubegrid.MarkedForClose || cubegrid.Closed) return;   //if it is not a Physics grid, or no longer exists, skip to next 
+
+                var blocks = new HashSet<Sandbox.Game.Entities.Cube.MySlimBlock>();
+                blocks = cubegrid.GetBlocks();
+
+                if (blocks.Count == 0) return;       
+                foreach (var rule in Settings.Data.BigRuleList)
                 {
-                    foreach (var rule in Settings.Data.BigRuleList)
-                    {
-
-                        if (rule.TargetTypeIdString != null)
+                   // LogTo("TargetSubtypeId " + rule.TargetSubtypeId + " TargetTypeIdString " + rule.TargetTypeId.ToString());
+                    if (rule.TargetTypeIdString != null && rule.TargetSubtypeId != null)
+                    {                        
+                        foreach (var blockk in blocks)
                         {
-                            tblocks = blocks.FindAll(block => block.BlockDefinition.Id.TypeId.ToString().Equals(rule.TargetTypeId));
-                            LogTo("DEGRADATE   FindAll TargetTypeIdStringnot null blocks: " + blocks.Count());
-                        }
-                        if (rule.TargetSubtypeId != null)
-                            tblocks = tblocks.FindAll(block => block.BlockDefinition.Id.SubtypeId.ToString().Equals(rule.TargetSubtypeId));
-
-
-
-
-
-                        foreach (IMySlimBlock target in tblocks)  //cycles through list of targeted blocks
-                        {
-                            LogTo("found block " + target.BlockDefinition.DisplayNameText + "Integrity " + target.Integrity + "/" + target.MaxIntegrity + " " + target.CurrentDamage + " BuildPercent: " + target.BuildPercent());
-                            if (target?.CubeGrid == null || target.BuildPercent() <= (float)0.05 || target.Closed())  //if the block doesnt exist or is below min build percentage
+                          //LogTo("block = SubtypeId: " + blockk.BlockDefinition.Id.SubtypeId.String + " TypeId:" + blockk.BlockDefinition.Id.TypeId);
+                            if ((blockk.BlockDefinition.Id.TypeId.ToString() == rule.TargetTypeId.ToString()) && (blockk.BlockDefinition.Id.SubtypeId.String == rule.TargetSubtypeId))
                             {
-                                LogTo("add block for delete: " + target.FatBlock.DisplayName);
-                                toRemove.Add(target);  //slates block for removal, skips damage step
-                                continue;
+                                tblocks.AddOrUpdate(blockk, rule.Damage, (k, v) => v);                               
                             }
-                            //MyAPIGateway.Utilities.InvokeOnGameThread(() => 
-                            LogTo("block DoDamage: " + target.BlockDefinition.DisplayNameText);
-                            //add list for parralel dmg after
-
-                            target.DoDamage((target.MaxIntegrity / 100) * Settings.Data.DamageAmount, MyStringHash.GetOrCompute("Degradation"), true);  //applies damage
                         }
-                        tblocks.Clear();
                     }
-                    foreach (IMySlimBlock block in toRemove)  //removes blocks slated for removal
-                        block.CubeGrid.RemoveBlock(block);
                 }
-                toRemove.Clear();
-                blocks.Clear();  //clears block list
-                                 
+            });
+
+            var toRemove = new HashSet<Sandbox.Game.Entities.Cube.MySlimBlock>();
+
+            foreach (var target in tblocks)  //cycles through list of targeted blocks
+            {
+                LogTo("Found block for damage " + target.Key.BlockDefinition.DisplayNameText + "Integrity " + target.Key.Integrity + "/" + target.Key.MaxIntegrity + " " + target.Key.CurrentDamage + " BuildPercent: " + target.Key.BuildPercent() + "damage percent: " + target.Value);
+                if (target.Key?.CubeGrid == null || target.Key.BuildPercent() <= (float)0.05 || target.Key.Closed())  //if the block doesnt exist or is below min build percentage
+                {
+                   // LogTo("add block for delete: " + target.Key.FatBlock.DisplayName);
+                    toRemove.Add(target.Key);  //mark block for removal, skips damage step
+                    continue;
+                }
+                target.Key.DoDamage((target.Key.MaxIntegrity / 100) * target.Value, MyStringHash.GetOrCompute("Degradation"), true, null, 0);  //applies damage
             }
+
+            foreach (Sandbox.Game.Entities.Cube.MySlimBlock block in toRemove)  //removes blocks marked for removal
+            {
+               LogTo("Remove critical damaged block " + block.BlockDefinition.Id.SubtypeId.String);  
+               block.CubeGrid.RemoveBlock(block);
+            }
+
             Settings.Save(Path.Combine(StoragePath, "DamageWave.cfg"));
         }
 
 
         private void ReflectRevealAll()
         {
-            //then to call
+            //hack things
             if (concealment != null && ReflectMethodRevealAll != null)
                 ReflectMethodRevealAll.Invoke(concealment, null);
         }
     }
+
     public static class Extensions
     {
         public static float BuildPercent(this IMySlimBlock block)  //converts health to build percent
