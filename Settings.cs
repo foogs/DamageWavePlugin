@@ -1,31 +1,21 @@
-﻿using System.IO;
-using System.Xml.Serialization;
-using Torch;
-using Torch.Collections;
+﻿using Sandbox.Definitions;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Xml.Serialization;
-using NLog.Targets;
-using Sandbox.Definitions;
 using Torch;
 using Torch.Collections;
-using VRage.Game;
 using VRage.ObjectBuilders;
 
 namespace DamageWave
 {
     public class Settings : ViewModel
     {
-        private bool _enabled = true;
-        private bool _debug_enabled = false;
-        private string _typeid = "Reactor";
-        private string _subtypeid = "LargeBlockLargeGenerator";
+        private bool _enabled;
+        private bool _debug_enabled;
 
-        [System.Xml.Serialization.XmlIgnoreAttribute]
         private ulong _checkInterval = 1739;
 
         [XmlIgnore]
@@ -33,10 +23,8 @@ namespace DamageWave
             new MtObservableList<BlocksToDamageSettings>();
 
         public DateTime CommandRunTime;
-
         public DateTime LastExecCommandTime;
         private string _commandTime = "23:45";
-        private ulong _damageamount = 1;
 
         [XmlElement(nameof(BigRuleList))]
         public BlocksToDamageSettings[] DynamicConcealmentSerial
@@ -50,8 +38,7 @@ namespace DamageWave
                         BigRuleList.Add(k);
             }
         }
-
-
+        
         public string CommandTime
         {
             get => _commandTime;
@@ -61,42 +48,25 @@ namespace DamageWave
                 OnPropertyChanged();
             }
         }
+
         public bool Enabled
         {
             get => _enabled;
             set { _enabled = value; OnPropertyChanged(); }
         }
 
-        public bool Enabled_Debug
+        public bool Debug
         {
             get => _debug_enabled;
             set { _debug_enabled = value; OnPropertyChanged(); }
         }
-
-        public ulong DamageAmount
-        {
-            get => _damageamount;
-            set { _damageamount = value; OnPropertyChanged(); }
-        }
-
+                
         public ulong CheckInterval //1 min?
         {
             get => _checkInterval;
             set { _checkInterval = value; OnPropertyChanged(); }
         }
-
-        public string TypeID
-        {
-            get => _typeid;
-            set { _typeid = value; OnPropertyChanged(); }
-        }
-
-        public string SubTypeID
-        {
-            get => _subtypeid;
-            set { _subtypeid = value; OnPropertyChanged(); }
-        }
-
+               
         public void Save(string path)
         {
             var xmlSerializer = new XmlSerializer(typeof(Settings));
@@ -125,7 +95,7 @@ namespace DamageWave
         {
             private string _typeId;
             private string _subtypeId;
-            private double _distance;
+            private float _distance;
 
             /// <summary>
             /// Target type ID
@@ -178,7 +148,7 @@ namespace DamageWave
             /// Distance to conceal at
             /// </summary>
             [XmlAttribute("Damage")]
-            public double Damage
+            public float Damage
             {
                 get => _distance;
                 set => SetValue(ref _distance, value);
