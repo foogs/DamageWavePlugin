@@ -16,7 +16,7 @@ namespace DamageWave
         private bool _enabled;
         private bool _debug_enabled;
 
-        private ulong _checkInterval = 1739;
+        private uint _checkInterval = 3000;
 
         [XmlIgnore]
         public MtObservableList<BlocksToDamageSettings> BigRuleList { get; } =
@@ -61,7 +61,7 @@ namespace DamageWave
             set { _debug_enabled = value; OnPropertyChanged(); }
         }
                 
-        public ulong CheckInterval //1 min?
+        public uint CheckInterval //1 min?
         {
             get => _checkInterval;
             set { _checkInterval = value; OnPropertyChanged(); }

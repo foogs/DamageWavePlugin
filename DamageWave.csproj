@@ -34,7 +34,7 @@
       <Private>False</Private>
     </Reference>
     <Reference Include="NLog, Version=4.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c, processorArchitecture=MSIL">
-      <HintPath>G:\Steam\steamapps\common\SpaceEngineers\Torch_home\NLog.dll</HintPath>
+      <HintPath>packages\NLog.4.4.12\lib\net45\NLog.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="PresentationCore" />
@@ -61,10 +61,6 @@
     </Reference>
     <Reference Include="SpaceEngineers.ObjectBuilders.XmlSerializers">
       <HintPath>$(SolutionDir)\GameBinaries\SpaceEngineers.ObjectBuilders.XmlSerializers.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="SteamSDK">
-      <HintPath>$(SolutionDir)\GameBinaries\SteamSDK.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="System" />
@@ -166,6 +162,9 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="512.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

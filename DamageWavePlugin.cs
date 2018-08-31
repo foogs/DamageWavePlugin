@@ -23,14 +23,15 @@ namespace DamageWave
     {
         public Persistent<Settings> Settings { get; private set; }
         private static readonly Logger Log = LogManager.GetLogger("DamageWave");
+        public static DamageWavePlugin Instance { get; private set; }
         private UserControl _control;
 
 
         MethodInfo ReflectMethodRevealAll = null;
         ITorchPlugin concealment = null;
 
-        public ulong _mycounter;
-        public ulong _mycounter2;
+        public uint _mycounter;
+        public uint _mycounter2;
         private bool _init; 
 
         public DamageWavePlugin()
@@ -42,7 +43,21 @@ namespace DamageWave
         {
             return _control ?? (_control = new DamageWaveControl { DataContext = this });
         }
+        private void Initialize()
+        {            
+            _init = true;
+            Instance = this;
 
+
+            foreach (var plugin in DamageWavePlugin.Instance.Torch.Managers.GetManager<PluginManager>())
+            {
+                if (plugin.Id == Guid.Parse("17f44521-b77a-4e85-810f-ee73311cf75d")) //find concealment
+                {
+                    concealment = plugin;
+                    ReflectMethodRevealAll = plugin.GetType().GetMethod("RevealAll", BindingFlags.Public | BindingFlags.Instance);
+                }
+            }
+        }
         public override void Init(ITorchBase torch)
         {
             base.Init(torch);
@@ -52,15 +67,6 @@ namespace DamageWave
             if (Settings?.Data == null)
                 Settings = new Persistent<Settings>(Path.Combine(StoragePath, "DamageWave.cfg"), new Settings());
 
-
-            foreach (var plugin in torch.Managers.GetManager<PluginManager>())
-            {
-                if (plugin.Id == Guid.Parse("17f44521-b77a-4e85-810f-ee73311cf75d"))
-                {
-                    concealment = plugin;
-                    ReflectMethodRevealAll = plugin.GetType().GetMethod("RevealAll", BindingFlags.Public | BindingFlags.Instance);
-                }
-            } 
         }
 
         public override void Update()
@@ -68,8 +74,13 @@ namespace DamageWave
             if (MyAPIGateway.Session == null || !Settings.Data.Enabled)
                 return;
 
-            if (_mycounter % Settings.Data.CheckInterval == 0)
+
+            if (!_init)
+                Initialize();
+
+            if (_mycounter == Settings.Data.CheckInterval)
             {
+                _mycounter = Settings.Data.CheckInterval;
 
                 if (_mycounter2 > 0) _mycounter2 = _mycounter2 - 1;
 
@@ -83,8 +94,7 @@ namespace DamageWave
             }
             _mycounter += 1;
 
-            if (_init) return;
-            _init = true;
+           
 
             bool isSkippedDoubleTimeCheck()
             {
@@ -113,39 +123,44 @@ namespace DamageWave
             LogTo("Damage wave incoming");
             ReflectRevealAll();           
 
-            var AllGrids = MyEntities.GetEntities().OfType<MyCubeGrid>();
+            List<MyCubeGrid> AllGrids =MyEntities.GetEntities().OfType<MyCubeGrid>().ToList<MyCubeGrid>();
 
             LogTo("All grids count:" + AllGrids.Count());
 
-            var tblocks = new ConcurrentDictionary<Sandbox.Game.Entities.Cube.MySlimBlock, float>();
-             
-        Parallel.ForEach(AllGrids, (cubegrid) =>  //cycles through all entities
+            var tblocks = new ConcurrentDictionary<Sandbox.Game.Entities.Cube.MySlimBlock, float>();            
+        ParallelTasks.Parallel.ForEach(AllGrids, (cubegrid) =>  //cycles through all entities
             {
-                if (cubegrid.MarkedForClose || cubegrid.Closed) return;   //if it is not a Physics grid, or no longer exists, skip to next 
-
-                var blocks = new HashSet<Sandbox.Game.Entities.Cube.MySlimBlock>();
-                blocks = cubegrid.GetBlocks();
-
-                if (blocks.Count == 0) return;       
-                foreach (var rule in Settings.Data.BigRuleList)
+                
+                try
                 {
-                   // LogTo("TargetSubtypeId " + rule.TargetSubtypeId + " TargetTypeIdString " + rule.TargetTypeId.ToString());
-                    if (rule.TargetTypeIdString != null && rule.TargetSubtypeId != null)
-                    {                        
-                        foreach (var blockk in blocks)
+                    if (cubegrid.MarkedForClose || cubegrid.Closed) return;   //if it is not a Physics grid, or no longer exists, skip to next 
+
+                    var blocks = new HashSet<Sandbox.Game.Entities.Cube.MySlimBlock>();
+                    blocks = cubegrid.GetBlocks();
+
+                    if (blocks.Count == 0) return;
+                    foreach (var rule in Settings.Data.BigRuleList)
+                    {
+                        // LogTo("TargetSubtypeId " + rule.TargetSubtypeId + " TargetTypeIdString " + rule.TargetTypeId.ToString());
+                        if (rule.TargetTypeIdString != null && rule.TargetSubtypeId != null)
                         {
-                          //LogTo("block = SubtypeId: " + blockk.BlockDefinition.Id.SubtypeId.String + " TypeId:" + blockk.BlockDefinition.Id.TypeId);
-                            if ((blockk.BlockDefinition.Id.TypeId.ToString() == rule.TargetTypeId.ToString()) && (blockk.BlockDefinition.Id.SubtypeId.String == rule.TargetSubtypeId))
+                            foreach (var blockk in blocks)
                             {
-                                tblocks.AddOrUpdate(blockk, rule.Damage, (k, v) => v);                               
+                                //LogTo("block = SubtypeId: " + blockk.BlockDefinition.Id.SubtypeId.String + " TypeId:" + blockk.BlockDefinition.Id.TypeId);
+                                if ((blockk.BlockDefinition.Id.TypeId.ToString() == rule.TargetTypeId.ToString()) && (blockk.BlockDefinition.Id.SubtypeId.String == rule.TargetSubtypeId))
+                                {
+                                    tblocks.AddOrUpdate(blockk, rule.Damage, (k, v) => v);
+                                }
                             }
                         }
                     }
                 }
-            });
-
+                catch(Exception ex) { LogTo("ex= " + ex.ToString() );}
+            },ParallelTasks.WorkPriority.High,null,true);
+             
             var toRemove = new HashSet<Sandbox.Game.Entities.Cube.MySlimBlock>();
 
+           
             foreach (var target in tblocks)  //cycles through list of targeted blocks
             {
                 LogTo("Found block for damage " + target.Key.BlockDefinition.DisplayNameText + "Integrity " + target.Key.Integrity + "/" + target.Key.MaxIntegrity + " " + target.Key.CurrentDamage + " BuildPercent: " + target.Key.BuildPercent() + "damage percent: " + target.Value);
