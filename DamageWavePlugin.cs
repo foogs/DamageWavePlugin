@@ -7,7 +7,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Threading.Tasks;
 using System.Windows.Controls;
 using Torch;
 using Torch.API;
@@ -18,7 +17,7 @@ using VRage.Game.ModAPI;
 using VRage.Utils;
 
 namespace DamageWave
-{    
+{
     public class DamageWavePlugin : TorchPluginBase, IWpfPlugin
     {
         public Persistent<Settings> Settings { get; private set; }

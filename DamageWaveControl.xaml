@@ -24,7 +24,7 @@
                 <Button x:Name="EditRules" Margin="3" Content="EditRules" Click="EditRules_Click" ToolTip="Rules for Damage Wave, set block type,subtype and % damage here." Width="74"/>
                 <Button Content="Save settings" Margin="3" Click="Conceal_OnClick" IsEnabled="False" ToolTip="Disabled for ur safe." Width="74" />
             </StackPanel>
-            <Label Content="Author: Foogs(▰˘◡˘▰)#8440 &#xD;&#xA;Check my ServerLink plugin too ;)&#xD;&#xA;(Discord)&#xD;&#xA;Thanks to:&#xA;Jimmacle for making Torch.&#xA;Rexxar for Block Degradation mod." ToolTip=";3" Height="92"/>
+            <Label Content="Author: Foogs(▰˘◡˘▰)#7074  &#xD;&#xA; Check my ServerLink plugin too ;)&#xD;&#xA;(Discord)&#xD;&#xA;Thanks to:&#xA;Jimmacle for making Torch.&#xA;Rexxar for Block Degradation mod." ToolTip=";3" Height="92"/>
             <Image Source="512.png" Height="200" ToolTip="kek" HorizontalAlignment="Left" Width="300"/>
         </StackPanel>
     </DockPanel>
