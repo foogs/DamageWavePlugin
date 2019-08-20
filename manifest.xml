@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <PluginManifest xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <Name>DamageWave</Name>
- <Guid>8d5546e1-586d-4cdd-9823-2425291fc7d5</Guid>
+ <Guid>ca5feba5-355e-413b-8c1b-794144d67444</Guid>
   <Version>1.1.1</Version>
 </PluginManifest>

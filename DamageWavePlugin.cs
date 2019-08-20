@@ -18,6 +18,7 @@ using VRage.Utils;
 
 namespace DamageWave
 {
+    //ca5feba5-355e-413b-8c1b-794144d67444
     public class DamageWavePlugin : TorchPluginBase, IWpfPlugin
     {
         public Persistent<Settings> Settings { get; private set; }
