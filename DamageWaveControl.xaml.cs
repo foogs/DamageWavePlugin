@@ -44,17 +44,7 @@ namespace DamageWave
         {
           var p = Plugin;
             Plugin.Torch.Invoke(delegate { p.Settings.Save(Path.Combine(p.StoragePath, "DamageWave.cfg")); });
-        }
-
-        private void CheckBox_Checked(object sender, RoutedEventArgs e)
-        {
-        }
-
-        private void TextBox_TextChanged(object sender, TextChangedEventArgs e)
-        {
-
-        }
-
+        } 
         private void EditRules_Click(object sender, RoutedEventArgs e)
         {
             var editor = new EditRulesForm
@@ -64,6 +54,11 @@ namespace DamageWave
                 WindowStartupLocation = WindowStartupLocation.CenterOwner
             };
             editor.ShowDialog();
+        }
+        private void Hyperlink_RequestNavigate(object sender, System.Windows.Navigation.RequestNavigateEventArgs e)
+        {
+            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(e.Uri.AbsoluteUri));
+            e.Handled = true;
         }
     }
 }

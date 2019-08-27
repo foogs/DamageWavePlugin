@@ -15,35 +15,40 @@ namespace DamageWave
     {
         private bool _enabled;
         private bool _debug_enabled;
-
         private uint _checkInterval = 3000;
+        private string _commandTime = "23:45";
+
+        public DateTime LastExecCommandTime;
+
 
         [XmlIgnore]
         public MtObservableList<BlocksToDamageSettings> BigRuleList { get; } =
-            new MtObservableList<BlocksToDamageSettings>();
-
-        public DateTime CommandRunTime;
-        public DateTime LastExecCommandTime;
-        private string _commandTime = "23:45";
+           new MtObservableList<BlocksToDamageSettings>();
 
         [XmlElement(nameof(BigRuleList))]
-        public BlocksToDamageSettings[] DynamicConcealmentSerial
+        public BlocksToDamageSettings[] BlockDamageSettigs
         {
             get => BigRuleList.ToArray();
             set
             {
                 BigRuleList.Clear();
                 if (value != null)
+                {
                     foreach (var k in value)
                         BigRuleList.Add(k);
+                    OnPropertyChanged();
+                }
             }
         }
-        
+
+
+        public DateTime CommandRunTime;
         public string CommandTime
         {
             get => _commandTime;
             set
-            {   _commandTime = value;
+            {
+                _commandTime = value;
                 CommandRunTime = DateTime.Parse(_commandTime);
                 OnPropertyChanged();
             }
@@ -60,37 +65,12 @@ namespace DamageWave
             get => _debug_enabled;
             set { _debug_enabled = value; OnPropertyChanged(); }
         }
-                
+
         public uint CheckInterval //1 min?
         {
             get => _checkInterval;
             set { _checkInterval = value; OnPropertyChanged(); }
         }
-               
-        public void Save(string path)
-        {
-            var xmlSerializer = new XmlSerializer(typeof(Settings));
-            using (var fileStream = File.Open(path, FileMode.OpenOrCreate))
-            {
-                xmlSerializer.Serialize(fileStream, this);
-            }
-        }
-
-        public static Settings LoadOrCreate(string path)
-        {
-            if (!File.Exists(path))
-                return new Settings();
-
-            var xmlSerializer = new XmlSerializer(typeof(Settings));
-            Settings result;
-            using (var fileStream = File.OpenRead(path))
-            {
-                result = (Settings)xmlSerializer.Deserialize(fileStream);
-            }
-            return result;
-        }
-
-
         public class BlocksToDamageSettings : ViewModel
         {
             private string _typeId;
@@ -143,7 +123,7 @@ namespace DamageWave
                     OnPropertyChanged(nameof(TargetSubtypeIdOptions));
                 }
             }
-            
+
             /// <summary>
             /// Distance to conceal at
             /// </summary>
@@ -170,6 +150,5 @@ namespace DamageWave
                     .Select(x => x.Id.SubtypeName ?? "")
                     .ToList() ?? new List<string>();
         }
-
     }
 }

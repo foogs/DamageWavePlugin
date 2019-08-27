@@ -9,8 +9,8 @@
     <DockPanel>
         <StackPanel DockPanel.Dock="Top" Height="545">
             <StackPanel DataContext="{Binding Settings.Data}">
-                <CheckBox x:Name="Checkbox_enabled" Content="Enable DamageWave" Margin="3" IsChecked="{Binding Enabled}" Checked="CheckBox_Checked" ToolTip="Enable plugin (or not) ;D" />
-                <CheckBox x:Name="Checkbox_debug" Content="Enable Debug" Margin="3" IsChecked="{Binding Debug}" Checked="CheckBox_Checked" ToolTip="Enable debug spam to log" />
+                <CheckBox x:Name="Checkbox_enabled" Content="Enable DamageWave" Margin="3" IsChecked="{Binding Enabled}" ToolTip="Enable plugin (or not) ;D" />
+                <CheckBox x:Name="Checkbox_debug" Content="Enable Debug" Margin="3" IsChecked="{Binding Debug}" ToolTip="Enable debug spam to log" />
                 <StackPanel Orientation="Horizontal"/>
                 <StackPanel Orientation="Horizontal"/>
                 <StackPanel Orientation="Horizontal"/>
@@ -24,9 +24,12 @@
                 <Button x:Name="EditRules" Margin="3" Content="EditRules" Click="EditRules_Click" ToolTip="Rules for Damage Wave, set block type,subtype and % damage here." Width="74"/>
                 <Button Content="Save settings" Margin="3" Click="Conceal_OnClick" IsEnabled="False" ToolTip="Disabled for ur safe." Width="74" />
             </StackPanel>
-            <Label Content="Author: Foogs(▰˘◡˘▰)#7074  &#xD;&#xA; Check my ServerLink plugin too ;)&#xD;&#xA;(Discord)&#xD;&#xA;Thanks to:&#xA;Jimmacle for making Torch.&#xA;Rexxar for Block Degradation mod." ToolTip=";3" Height="92"/>
-            <Image Source="512.png" Height="200" ToolTip="kek" HorizontalAlignment="Left" Width="300"/>
+            <Label Content="Author: Foogs(▰˘◡˘▰)#7074  &#xD;&#xA; Check my ServerLink plugin too ;)&#xD;&#xA;(Discord)&#xD;&#xA;Thanks to:&#xA;Jimmacle for making Torch.&#xA;Rexxar for Block Degradation mod." ToolTip=";3" Height="108"/>
+            <Label ToolTip="Yes you already hacked :D">
+                <Hyperlink NavigateUri="https://github.com/foogs/FoogsProjects/wiki" Background="Gold" RequestNavigate="Hyperlink_RequestNavigate">
+                    <Run Text="Dev: Foogs, link to all plugins list"/>
+                </Hyperlink>
+            </Label>
         </StackPanel>
     </DockPanel>
-
 </UserControl>

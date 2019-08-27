@@ -188,6 +188,10 @@ namespace DamageWave
             //hack things
             if (concealment != null && ReflectMethodRevealAll != null)
                 ReflectMethodRevealAll.Invoke(concealment, null);
+            else
+            {
+                LogTo("Reveal all concealment not found");
+            }
         }
     }
 
